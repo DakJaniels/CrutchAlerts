@@ -64,6 +64,7 @@ Crutch.format = {
 -- Kyne's Aegis
     [133515] = 100204.5, -- Chaurus Totem seems to send out first projectile ~4.5 seconds after spawn
     [134050] =  30400, -- Wrath of Tides
+    [134196] =    500, -- Crashing Wave
 
 -- Lucent Citadel
     [214203] = 500, -- Bleak Annihilation
@@ -92,12 +93,15 @@ Crutch.format = {
     [233610] = 300, -- Blazing Smash (Skorkhif)
     [232397] = 500, -- Effluvial Expellant (Shaper of Flesh)
     [236569] = 500, -- Spectral Revenge (Osteon Spectral Revenant)
+    [238800] = 800, -- Phantasmal Barrage
 
 -- Rockgrove
     [152688] = 2.5, -- Cinder Cleave (Havocrel Annihilator)
     [157860] = 1000, -- Noxious Sludge (hide because of sides)
     [150008] = 30000, -- Hemorrhaging Smack (Flesh Abomination)
     [149089] = 500, -- Astral Shield
+    [153517] = {info = 1105, text = "Clockwise |t32:32:esoui/art/housing/rotation_arrow_reverse.dds:inheritcolor|t"}, -- CW
+    [153518] = {info = 1205, text = "Counter-Clockwise|t32:32:esoui/art/housing/rotation_arrow.dds:inheritcolor|t"}, -- CCW
 
 -- Sanctum Ophidia
     [ 56857] = 200, -- Emerald Eclipse (The Serpent)

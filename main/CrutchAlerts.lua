@@ -47,7 +47,6 @@ local defaultOptions = {
     debugLine = false,
     debugChatSpam = false,
     debugOther = false,
-    debugUi = false,
     debugLineDistance = false,
     showSubtitles = false,
     subtitlesIgnoredZones = {},
@@ -67,6 +66,9 @@ local defaultOptions = {
         showDamageable = true,
         showRaidDiag = false,
         showJBeam = true,
+    },
+    console = { -- Some console-specific settings?
+        showProminent = true,
     },
     bossHealthBar = {
         enabled = true,
@@ -291,7 +293,12 @@ local function Initialize()
         Crutch.InitProminentV2Options()
         Crutch.savedOptions.prominentV2FirstTime = false
     end
-    Crutch:CreateSettingsMenu()
+
+    if (IsConsoleUI()) then
+        Crutch:CreateConsoleSettingsMenu()
+    else
+        Crutch:CreateSettingsMenu()
+    end
 
     -- Position
     CrutchAlertsContainer:SetAnchor(CENTER, GuiRoot, TOP, Crutch.savedOptions.display.x, Crutch.savedOptions.display.y)
@@ -312,6 +319,7 @@ local function Initialize()
     end
 
     -- Init general
+    Crutch.InitializeStyles()
     Crutch.InitializeHooks()
     Crutch.InitializeDamageable()
     Crutch.InitializeDamageTaken()
@@ -319,9 +327,9 @@ local function Initialize()
     Crutch.RegisterTest()
     Crutch.RegisterStacks()
     Crutch.RegisterEffectChanged()
-    Crutch.InitializeDebug()
     Crutch.RegisterFatecarver()
     Crutch.InitializeGlobalEvents()
+    Crutch.InitializeRenderSpace()
 
     -- Boss health bar
     Crutch.BossHealthBar.Initialize()

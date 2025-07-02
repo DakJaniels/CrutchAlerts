@@ -173,8 +173,7 @@ local SUBTITLE_TIMES = {
 -- MoL
     ["Mirarro"] = {
         -- Zhaj'hassa
-        ["Don't .... It's ... trap."] = 16.8,
-        ["He's coming!"] = 16.8,
+        ["Don't …. It's … trap. He's coming!"] = 16.8,
         ["Nicht*… Eine*… Falle."] = 16.8,
         ["Er kommt!"] = 16.8,
     },
@@ -573,6 +572,7 @@ end
 function Crutch.DisplayDamageable(time, displayFormat)
     dmgDisplayFormat = displayFormat or "Boss in |c%s%.1f|r"
     pollTime = GetGameTimeMilliseconds() + time * 1000
+    CrutchAlertsDamageableLabel:SetFont(Crutch.GetStyles().damageableFont)
     CrutchAlertsDamageableLabel:SetText(string.format(dmgDisplayFormat, GetTimerColor(time * 1000), time))
     CrutchAlertsDamageableLabel:SetHidden(false)
 

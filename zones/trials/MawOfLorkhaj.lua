@@ -246,7 +246,13 @@ local function OnConversion(_, result, _, _, _, _, _, _, _, _, hitValue, _, _, _
         Crutch.SetMechanicIconForUnit(atName, iconPath, nil, iconData.color)
 
         -- If self, display a prominent alert because COLOR SWAP!
-        if (atName == GetUnitDisplayName("player") and Crutch.savedOptions.mawoflorkhaj.prominentColorSwap) then
+        local showProminent
+        if (IsConsoleUI()) then
+            showProminent = Crutch.savedOptions.console.showProminent
+        else
+            showProminent = Crutch.savedOptions.mawoflorkhaj.prominentColorSwap
+        end
+        if (atName == GetUnitDisplayName("player") and showProminent) then
             Crutch.DisplayProminent(888003)
         end
     elseif (result == ACTION_RESULT_EFFECT_FADED) then
@@ -336,11 +342,32 @@ local function UnregisterRakkhat()
     EVENT_MANAGER:UnregisterForEvent(Crutch.name .. "RakkhatVoidShackle", EVENT_COMBAT_EVENT)
 end
 
+
+---------------------------------------------------------------------
+-- Font shenanigans
+---------------------------------------------------------------------
+local function ApplyStyle(style)
+    for i = 1, 6 do
+        CrutchAlertsMawOfLorkhaj:GetNamedChild("Pad" .. tostring(i) .. "Label"):SetFont(style)
+    end
+end
+
+local initialized = false
+local function InitFont()
+    if (initialized) then return end
+    initialized = true
+
+    ZO_PlatformStyle:New(ApplyStyle, "$(BOLD_FONT)|20|soft-shadow-thick", "ZoFontGamepad27")
+end
+
+
 ---------------------------------------------------------------------
 -- Register/Unregister
 ---------------------------------------------------------------------
 function Crutch.RegisterMawOfLorkhaj()
     Crutch.dbgOther("|c88FFFF[CT]|r Registered Maw of Lorkhaj")
+
+    InitFont()
 
     -- Zhaj'hassa cleanse pads
     RegisterZhajhassa()
