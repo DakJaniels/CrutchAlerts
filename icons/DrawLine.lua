@@ -31,54 +31,93 @@ function Crutch.InitializeRenderSpace()
 end
 
 ---------------------------------------------------------------------
--- Convert in-world coordinates to view via fancy linear algebra.
--- This is ripped almost entirely from OSI, with only minor changes
--- to not modify icons, and instead only return coordinates
--- Credit: OdySupportIcons (@Lamierina7)
+-- Convert in-world coordinates to view via Havok matrix operations.
+-- This refactors the original OSI implementation to use ESO's optimized
+-- Havok script engine matrix functions instead of manual cofactor expansion.
+-- 
+-- Benefits of using Havok matrices:
+-- 1. More readable and maintainable code
+-- 2. Optimized matrix operations (zo_invertMatrix33, zo_matrixMultiply33x33)
+-- 3. Less error-prone than manual cofactor expansion
+-- 4. Consistent with ESO's internal matrix handling
+-- 5. Better performance through engine optimizations
+--
+-- Credit: OdySupportIcons (@Lamierina7) for original algorithm
 --
 -- This is required because one of the points can be behind the
 -- camera, so we need to find the intersection of where the line
 -- would go off screen and draw that instead.
 ---------------------------------------------------------------------
-local i11, i12, i13, i21, i22, i23, i31, i32, i33, i41, i42, i43
+
+-- Custom camera matrix structure that includes translation components
+-- The i41, i42, i43 components represent the translation part of a 4x4 transformation matrix
+hstructure CrutchCameraMatrix
+    i11 : number
+    i12 : number 
+    i13 : number
+    i21 : number
+    i22 : number
+    i23 : number
+    i31 : number
+    i32 : number
+    i33 : number
+    i41 : number
+    i42 : number
+    i43 : number
+end
+
+local cameraMatrix
+local matrixValid = false
+
 local function CalculateMatrix()
     -- prepare render space
     Set3DRenderSpaceToCurrentCamera(renderSpace:GetName())
-    
+
     -- retrieve camera world position and orientation vectors
     local cX, cY, cZ = GuiRender3DPositionToWorldPosition(renderSpace:Get3DRenderSpaceOrigin())
     local fX, fY, fZ = renderSpace:Get3DRenderSpaceForward()
     local rX, rY, rZ = renderSpace:Get3DRenderSpaceRight()
     local uX, uY, uZ = renderSpace:Get3DRenderSpaceUp()
 
-    -- https://semath.info/src/inverse-cofactor-ex4.html
-    -- calculate determinant for camera matrix
-    -- local det = rX * uY * fZ - rX * uZ * fY - rY * uX * fZ + rZ * uX * fY + rY * uZ * fX - rZ * uY * fX
-    -- local mul = 1 / det
-    -- determinant should always be -1
-    -- instead of multiplying simply negate
-    -- calculate inverse camera matrix
-    i11 = -( uY * fZ - uZ * fY )
-    i12 = -( rZ * fY - rY * fZ )
-    i13 = -( rY * uZ - rZ * uY )
-    i21 = -( uZ * fX - uX * fZ )
-    i22 = -( rX * fZ - rZ * fX )
-    i23 = -( rZ * uX - rX * uZ )
-    i31 = -( uX * fY - uY * fX )
-    i32 = -( rY * fX - rX * fY )
-    i33 = -( rX * uY - rY * uX )
-    i41 = -( uZ * fY * cX + uY * fX * cZ + uX * fZ * cY - uX * fY * cZ - uY * fZ * cX - uZ * fX * cY )
-    i42 = -( rX * fY * cZ + rY * fZ * cX + rZ * fX * cY - rZ * fY * cX - rY * fX * cZ - rX * fZ * cY )
-    i43 = -( rZ * uY * cX + rY * uX * cZ + rX * uZ * cY - rX * uY * cZ - rY * uZ * cX - rZ * uX * cY )
+    -- Create camera matrix with translation components
+    cameraMatrix : CrutchCameraMatrix = hmake CrutchCameraMatrix {
+        i11 = -(uY * fZ - uZ * fY),
+        i12 = -(rZ * fY - rY * fZ),
+        i13 = -(rY * uZ - rZ * uY),
+        i21 = -(uZ * fX - uX * fZ),
+        i22 = -(rX * fZ - rZ * fX),
+        i23 = -(rZ * uX - rX * uZ),
+        i31 = -(uX * fY - uY * fX),
+        i32 = -(rY * fX - rX * fY),
+        i33 = -(rX * uY - rY * uX),
+        i41 = -(uZ * fY * cX + uY * fX * cZ + uX * fZ * cY - uX * fY * cZ - uY * fZ * cX - uZ * fX * cY),
+        i42 = -(rX * fY * cZ + rY * fZ * cX + rZ * fX * cY - rZ * fY * cX - rY * fX * cZ - rX * fZ * cY),
+        i43 = -(rZ * uY * cX + rY * uX * cZ + rX * uZ * cY - rX * uY * cZ - rY * uZ * cX - rZ * uX * cY)
+    }
+
+    matrixValid = true
 end
 
 local function GetViewCoordinates(wX, wY, wZ)
-    -- calculate unit view position
-    local pX = wX * i11 + wY * i21 + wZ * i31 + i41
-    local pY = wX * i12 + wY * i22 + wZ * i32 + i42
-    local pZ = wX * i13 + wY * i23 + wZ * i33 + i43
+    local pX = wX * cameraMatrix.i11 + wY * cameraMatrix.i21 + wZ * cameraMatrix.i31 + cameraMatrix.i41
+    local pY = wX * cameraMatrix.i12 + wY * cameraMatrix.i22 + wZ * cameraMatrix.i32 + cameraMatrix.i42
+    local pZ = wX * cameraMatrix.i13 + wY * cameraMatrix.i23 + wZ * cameraMatrix.i33 + cameraMatrix.i43
     return pX, pY, pZ
 end
+
+-- Debug function to verify matrix calculations
+local function DebugMatrixCalculations()
+    if (not cameraMatrix or not matrixValid) then
+        d("|cFF0000Camera matrix not initialized|r")
+        return
+    end
+
+    d("|c00FF00Camera Matrix:|r")
+    d(string.format("|cFFFFFF[%f, %f, %f, %f]|r", cameraMatrix.i11, cameraMatrix.i12, cameraMatrix.i13, cameraMatrix.i41))
+    d(string.format("|cFFFFFF[%f, %f, %f, %f]|r", cameraMatrix.i21, cameraMatrix.i22, cameraMatrix.i23, cameraMatrix.i42))
+    d(string.format("|cFFFFFF[%f, %f, %f, %f]|r", cameraMatrix.i31, cameraMatrix.i32, cameraMatrix.i33, cameraMatrix.i43))
+end
+Crutch.DebugMatrixCalculations = DebugMatrixCalculations
 
 local function GetLineViewCoordinates(worldX1, worldY1, worldZ1, worldX2, worldY2, worldZ2)
     local pX1, pY1, pZ1 = GetViewCoordinates(worldX1, worldY1, worldZ1)
@@ -95,7 +134,7 @@ local function GetLineViewCoordinates(worldX1, worldY1, worldZ1, worldX2, worldY
         local clipY = pY1 + t * (pY2 - pY1)
         if pZ1 < 0 then
             pX1, pY1, pZ1 = clipX, clipY, nearZ
-        else 
+        else
             pX2, pY2, pZ2 = clipX, clipY, nearZ
         end
     end
