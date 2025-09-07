@@ -161,7 +161,6 @@ Crutch.testing = {
 
     [241326] = true, -- Annihilation
     [241327] = true, -- Annihilation
-    [241328] = true, -- Annihilation
     [241329] = true, -- Annihilation
 
     [241224] = true, -- Ominous Vision
