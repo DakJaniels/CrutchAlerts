@@ -3,7 +3,7 @@
 -- @author Kyzeragon
 -----------------------------------------------------------
 
-CrutchAlerts = CrutchAlerts or {}
+---@class CrutchAlerts
 local Crutch = CrutchAlerts
 Crutch.name = "CrutchAlerts"
 Crutch.version = "2.0.0-beta1"

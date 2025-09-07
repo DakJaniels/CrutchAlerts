@@ -15,6 +15,8 @@
 ; language translations and other data!
 ; and of course Lamierina7 for creating OdySupportIcons :D
 
+init.lua
+
 main/CrutchAlerts.lua
 main/CrutchAlerts.xml
 main/GlobalEvents.lua

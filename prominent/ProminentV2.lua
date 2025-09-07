@@ -1,4 +1,4 @@
-CrutchAlerts = CrutchAlerts or {}
+---@class CrutchAlerts
 local Crutch = CrutchAlerts
 
 -- Data for prominent display of notifications

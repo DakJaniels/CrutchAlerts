@@ -1,5 +1,4 @@
-CrutchAlerts = CrutchAlerts or {}
-CrutchAlerts.BossHealthBar = CrutchAlerts.BossHealthBar or {}
+---@class CrutchAlerts
 local Crutch = CrutchAlerts
 local BHB = Crutch.BossHealthBar
 

@@ -1,4 +1,4 @@
-CrutchAlerts = CrutchAlerts or {}
+---@class CrutchAlerts
 local Crutch = CrutchAlerts
 
 local childNames = {"LeftMid", "LeftTop", "LeftBottom", "RightMid", "RightTop", "RightBottom"}
