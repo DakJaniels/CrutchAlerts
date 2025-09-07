@@ -2,6 +2,8 @@
 local Crutch = CrutchAlerts
 local BHB = Crutch.BossHealthBar
 
+local _ = nil
+
 -- CrutchAlertsBossHealthBarContainerBar
 -- ZO_StatusBar_SmoothTransition(self, value, max, forceInit, onStopCallback, customApproachAmountMs)
 -- /script ZO_StatusBar_SmoothTransition(CrutchAlertsBossHealthBarContainerBar, 0, 1)
